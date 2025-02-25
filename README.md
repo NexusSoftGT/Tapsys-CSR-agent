@@ -81,7 +81,7 @@ CREATE TABLE complaints (
 Run the Python script to launch the AI Transcriber & TAPSYS Support Bot.
 `python ui.py`
 
-## 2. How the Bot Works
+2. How the Bot Works
 Press the "Press to Speak" button to start the interaction.
 Speak your issue.
 The bot will transcribe your voice into text, generate a response using RAG or LLM, and then continue listening for the next issue until the conversation ends.
