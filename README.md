@@ -37,3 +37,21 @@ Follow these steps to set up the project on your local machine:
 ```bash
 git clone https://github.com/your-username/tapsys-ai-transcriber.git
 cd tapsys-ai-transcriber
+
+
+### 2. Install Python dependencies
+Create a virtual environment and install the required dependencies.
+
+```bash
+# Create a virtual environment
+python -m venv .venv
+
+# Activate the virtual environment
+# Windows:
+.venv\Scripts\activate
+# Mac/Linux:
+source .venv/bin/activate
+
+# Install the required libraries
+pip install -r requirements.txt
+
