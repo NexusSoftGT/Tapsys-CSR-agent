@@ -37,6 +37,7 @@ Follow these steps to set up the project on your local machine:
 ```bash
 git clone https://github.com/your-username/tapsys-ai-transcriber.git
 cd tapsys-ai-transcriber
+```
 
 
 ### 2. Install Python dependencies
@@ -54,4 +55,56 @@ source .venv/bin/activate
 
 # Install the required libraries
 pip install -r requirements.txt
+```
 
+### 3. Setup the Database
+Install MySQL (if not already installed).
+Set up the MySQL database for storing tickets:
+Run the following SQL command in phpMyAdmin or MySQL Workbench to create the necessary tables:
+
+```bash
+CREATE DATABASE tapsys_db;
+
+USE tapsys_db;
+
+CREATE TABLE complaints (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    phone VARCHAR(255),
+    issue TEXT,
+    transcript TEXT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+## Usage
+1. Start the Application
+Run the Python script to launch the AI Transcriber & TAPSYS Support Bot.
+`python ui.py`
+
+## 2. How the Bot Works
+Press the "Press to Speak" button to start the interaction.
+Speak your issue.
+The bot will transcribe your voice into text, generate a response using RAG or LLM, and then continue listening for the next issue until the conversation ends.
+If the conversation ends (with "bye bye" or "Allah Hafiz"), the entire conversation is saved as a single ticket in the MySQL database with the summary.
+
+# Folder Structure
+
+```bash
+/tapsys-ai-transcriber
+│
+├── ui.py                # Main UI application (Tkinter)
+├── database.py          # Database connection and functions
+├── speech.py            # Speech-to-text functions
+├── rag.py               # Retrieval-Augmented Generation functions
+├── llm.py               # Language Model functions for fallback
+├── phone_lookup.py      # Hardcoded merchant lookup (to be replaced with real DB)
+├── requirements.txt     # List of dependencies
+└── README.md            # Project overview and instructions
+```
+
+## Configuration
+### 1. Database Configuration
+Make sure your MySQL database is configured correctly and the credentials are updated in database.py.
+
+### 2. Phone Lookup
+Currently, a hardcoded phone number and merchant lookup is used. Replace it with an actual database or API call if needed.
