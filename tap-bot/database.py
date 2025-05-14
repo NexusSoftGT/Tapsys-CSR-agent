@@ -1,24 +1,33 @@
 import mysql.connector
+from datetime import datetime
 
-# ✅ MySQL Connection (XAMPP default settings)
-conn = mysql.connector.connect(
-    host="localhost",  # XAMPP MySQL host
-    user="root",       # Default user for XAMPP MySQL
-    password="",       # No password by default for XAMPP MySQL
-    database="tapsys_db"  # The database you created
-)
-
-cursor = conn.cursor()
-
-def save_complaint(phone, issue, transcript):
-    """Save complaint in MySQL database"""
-    cursor.execute(
-        "INSERT INTO complaints (phone, issue, transcript) VALUES (%s, %s, %s)",
-        (phone, issue, transcript)
+def save_ticket_to_mysql(title, body, requester_id, team_id, team_member_id=1):
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",  # your MySQL password here
+        database="helpdesk_core_php"
     )
-    conn.commit()
 
-def close_connection():
-    """Close the database connection"""
-    cursor.close()
+    cursor = conn.cursor()
+
+    insert_query = """
+        INSERT INTO ticket (title, body, requester, team, team_member, status, priority, rating, created_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+
+    data = (
+        title,
+        body,
+        requester_id,
+        team_id,
+        team_member_id,
+        "open",       # status
+        "medium",     # priority
+        0,            # rating
+        datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    )
+
+    cursor.execute(insert_query, data)
+    conn.commit()
     conn.close()

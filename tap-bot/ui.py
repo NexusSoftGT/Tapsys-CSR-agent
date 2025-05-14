@@ -4,11 +4,13 @@ import sounddevice as sd
 import numpy as np
 import wave
 import speech
-import rag
+# import rag
 import llm
 # import database
 import phone_lookup
 import time
+import speak
+
 
 
 # ✅ UI Configuration 
@@ -24,7 +26,8 @@ channels = 1 # supporting mono audio
 AUDIO_FILE_PATH = "recorded_audio.wav"
 
 # ✅ Hardcoded Phone Number for Now
-PHONE_NUMBER = "03212430237"
+PHONE_NUMBER = "03330220803"  # Replace with actual phone number
+
 merchant = phone_lookup.get_merchant(PHONE_NUMBER)
 greeting = f"As-salam wa alaikum, {merchant['name']} {merchant['salutation']}! Farmayen, mein aap ke lye kya kr sakta hun?" if merchant else "As-salam wa alaikum! Farmayen, mein aap ke lye kya kr sakta hun?"
 
@@ -40,6 +43,11 @@ chat_display.pack(pady=20, padx=40, fill="both", expand=True)
 
 # Variable to hold the entire conversation
 chat_memory = []
+llm_history = []
+
+
+current_issue = None  # 🔧 Keeps track of the current issue between user and bot
+
 
 # def summarize_text(transcript):
 #     """Summarizes the conversation transcript"""
@@ -51,6 +59,9 @@ chat_memory = []
 def update_chat(role, text):
     """Display messages in chat format and store them in memory"""
     chat_memory.append(f"{role}: {text}")
+    if role in ["🤖 Bot", "🎤 Me"]:
+        llm_history.append({"role": "assistant" if role == "🤖 Bot" else "user", "content": text})
+
     chat_display.insert("end", f"\n\n{role}: {text}")
     chat_display.see("end")
 
@@ -66,6 +77,7 @@ def toggle_recording():
         recording = True
         audio_data = []
         update_chat("🎙️ Me", "Recording started... Speak now!")
+        
         threading.Thread(target=record_thread).start()
     else:
         recording = False
@@ -102,33 +114,30 @@ def record_thread():
                     silence_start = None
 
 def process_transcription():
-    """Transcribes & gets AI response, handles chat memory"""
+    global current_issue
+
     transcript = speech.transcribe_audio()
     update_chat("🎤 Me", transcript)
 
-    # ✅ First check RAG response
-    rag_response = rag.search_rag(transcript)
-    ai_response = rag_response if rag_response else llm.query_llm(transcript)
-
-    update_chat("🤖 Bot", ai_response)
-
-    # Check for end of conversation (e.g., "bye bye", "Allah Hafiz")
     if "bye bye" in transcript.lower() or "allah hafiz" in transcript.lower():
-        
-        # Summarize the conversation before saving
-        # summary = summarize_text(transcript)
-
-        # Save the entire conversation as a single ticket
-        phone = PHONE_NUMBER  # Assume phone number is stored in a variable
-        issue = " ".join(chat_memory)  # Use the whole chat as the issue
+        update_chat("🤖 Bot", "Shukrya! Aapka masla darj kar diya gaya hai. Khuda Hafiz. Take care!")
 
 
-        # database.save_complaint(phone, summary, issue)  # Uncomment this line to save to the database
+        # ✅ Save to MySQL ticket table
+        from database import save_ticket_to_mysql
+        requester_id = 46  # from your database
+        team_id = 1        # default team
+        chat_log = "\n".join(chat_memory)
+        save_ticket_to_mysql("Auto Ticket from AI Bot", chat_log, requester_id, team_id)
 
-
-
-        update_chat("🤖 Bot", "Shukrya! Aapka masla darj kar diya gaya hai. Hamara numainda jald aap se raabta karega.")
-        chat_memory.clear()  # Reset chat memory for the next conversation
+        chat_memory.clear()
+        current_issue = None
+        return
+         
+    ai_response = llm.query_llm(transcript, history=llm_history)
+    update_chat("🤖 Bot", ai_response)
+    speak.speak_text(ai_response)
+    
 
 # ✅ Display Greeting Only Once When App Starts
 update_chat("🤖 Bot", greeting)
