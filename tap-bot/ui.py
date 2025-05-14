@@ -6,7 +6,7 @@ import wave
 import speech
 import rag
 import llm
-import database
+# import database
 import phone_lookup
 import time
 
@@ -19,7 +19,8 @@ ctk.set_default_color_theme("blue")
 recording = False
 audio_data = []
 fs = 44100
-channels = 2
+channels = 1 # supporting mono audio
+# ✅ Audio File Path
 AUDIO_FILE_PATH = "recorded_audio.wav"
 
 # ✅ Hardcoded Phone Number for Now
@@ -40,11 +41,11 @@ chat_display.pack(pady=20, padx=40, fill="both", expand=True)
 # Variable to hold the entire conversation
 chat_memory = []
 
-def summarize_text(transcript):
-    """Summarizes the conversation transcript"""
-    # Here, you can use LLM for summarization
-    summary = llm.query_llm(f"Summarize this: {transcript}")
-    return summary
+# def summarize_text(transcript):
+#     """Summarizes the conversation transcript"""
+#     # Here, you can use LLM for summarization
+#     summary = llm.query_llm(f"Summarize this: {transcript}")
+#     return summary
 
 
 def update_chat(role, text):
@@ -115,12 +116,17 @@ def process_transcription():
     if "bye bye" in transcript.lower() or "allah hafiz" in transcript.lower():
         
         # Summarize the conversation before saving
-        summary = summarize_text(transcript)
+        # summary = summarize_text(transcript)
 
         # Save the entire conversation as a single ticket
         phone = PHONE_NUMBER  # Assume phone number is stored in a variable
         issue = " ".join(chat_memory)  # Use the whole chat as the issue
-        database.save_complaint(phone, summary, issue)
+
+
+        # database.save_complaint(phone, summary, issue)  # Uncomment this line to save to the database
+
+
+
         update_chat("🤖 Bot", "Shukrya! Aapka masla darj kar diya gaya hai. Hamara numainda jald aap se raabta karega.")
         chat_memory.clear()  # Reset chat memory for the next conversation
 

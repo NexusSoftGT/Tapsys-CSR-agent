@@ -5,7 +5,7 @@ def query_llm(query):
     """Fallback to Groq LLM if RAG fails"""
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}"}
     data = {
-        "model": "mixtral-8x7b-32768",
+        "model": "llama3-70b-8192",
         "messages": [
             {"role": "system", "content": "You are an expert in TAPSYS POS-related issues."},
             {"role": "user", "content": query}
